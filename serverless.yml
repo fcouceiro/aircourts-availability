@@ -1,0 +1,40 @@
+service: ${env:SERVICE,'aircourts-availability'}
+frameworkVersion: '3'
+useDotenv: true
+variablesResolutionMode: 20210326
+
+plugins:
+  - serverless-offline  # should be last in list
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  region: eu-west-3
+  endpointType: REGIONAL
+  memorySize: 256
+  versionFunctions: false
+  apiGateway:
+    minimumCompressionSize: 1400
+  stackTags:
+    SERVICE: ${self:service}-${sls:stage}
+  environment:
+    AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1'
+
+functions:
+  app:
+    handler: lambda.handler
+    events:
+      - http: 
+          method: any
+          path: /{proxy+}
+          cors:
+            origin: '*'
+            headers:
+              - Content-Type
+              - X-Amz-Date
+              - Authorization
+              - X-Api-Key
+              - X-Amz-Security-Token
+              - X-Amz-User-Agent
+            allowCredentials: true
+    timeout: 25

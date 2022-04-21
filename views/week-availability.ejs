@@ -1,0 +1,29 @@
+<!doctype html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>AirCourts - Week <%= weekDate %>
+    </title>
+</head>
+
+<body>
+    <% Object.keys(availabilities.slotsByDate).map((date)=> { %>
+        <h2><%= date %></h2>
+        <ul>
+        <% availabilities.slotsByDate[date].map((slotId)=> { %>
+        <% const slot=availabilities.slotsById[slotId] %>
+        <% const court=availabilities.courtsById[slot.courtId] %>
+            <li style="margin-bottom: 15px;">
+                <%= slot.start %> - <%= slot.end %> @ <%= court.clubName %> - <%= court.name %>
+                <a href="https://www.aircourts.com/index.php/site/view_club/<%= court.clubId %>/<%= date %>/<%= slot.start %>" target="_blank">reservar</a>
+            </li>
+        <% }) %>
+        </ul>
+    <% }) %>
+</body>
+
+</html>
