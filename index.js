@@ -129,6 +129,10 @@ async function getClubsWeekAvailability({ clubIds, weekDate, startTime, sport })
             },
             slotsByDate: slotsByDate
         }
+    }, {
+        courtsById: {},
+        slotsById: {},
+        slotsByDate: {}
     })
     return mergedAvailabilities
 }

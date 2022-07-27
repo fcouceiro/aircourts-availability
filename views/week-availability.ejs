@@ -11,6 +11,11 @@
 </head>
 
 <body>
+    <form method="get">
+        <label for="weekDate">Date:</label>
+        <input type="date" id="weekDate" name="weekDate" value="<%= htmlWeekDate %>"><br><br>
+        <input type="submit" value="Submit">
+    </form>
     <% Object.keys(availabilities.slotsByDate).map((date)=> { %>
         <h2><%= date %></h2>
         <ul>

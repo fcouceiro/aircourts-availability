@@ -27,7 +27,12 @@ app.get('/week-availability', async (req, res) => {
         startTime: req.query.startTime,
         sport: 4 // Padel
     })
-    res.render('week-availability', { weekDate: moment(weekDate).format('DD/MM/yyyy'), availabilities: mergedAvailabilities })
+    const momentWeekDate = moment(weekDate)
+    res.render('week-availability', {
+        htmlWeekDate: momentWeekDate.format('YYYY-MM-DD'),
+        weekDate: momentWeekDate.format('DD/MM/yyyy'), 
+        availabilities: mergedAvailabilities
+    })
 })
 
 app.get('/', (req, res) => res.render('index'))
