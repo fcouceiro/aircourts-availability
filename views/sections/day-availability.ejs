@@ -1,0 +1,22 @@
+<h2><%= date %></h2>
+<table>
+    <thead>
+        <th>Time</th>
+        <th>Club</th>
+        <th>Court</th>
+        <th></th>
+    </thead>
+    <tbody>
+        <% slots.map((slot)=> { %>
+            <tr>
+                <% const datetime=moment(slot.timestamp) %>
+                <td><%= datetime.format('HH:mm') %></td>
+                <td><%= slot.data.court.clubName %></td>
+                <td><%= slot.data.court.name %></td>
+                <td>
+                    <a href="https://www.aircourts.com/index.php/site/view_club/<%= slot.data.court.clubId %>/<%= date %>/<%= slot.start_date %>" target="_blank">reservar</a>
+                </td>
+            </tr>
+        <% }) %>
+    </tbody>
+</table>

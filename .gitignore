@@ -1,3 +1,7 @@
 .serverless/
 .vscode/
 node_modules/
+.dynamodb/
+.DS_Store
+sample.json
+diagrams/

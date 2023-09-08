@@ -1,14 +1,14 @@
 service: ${env:SERVICE,'aircourts-availability'}
 frameworkVersion: '3'
 useDotenv: true
-variablesResolutionMode: 20210326
 
 plugins:
+  - serverless-dynamodb
   - serverless-offline  # should be last in list
 
 provider:
   name: aws
-  runtime: nodejs14.x
+  runtime: nodejs16.x
   region: eu-west-3
   endpointType: REGIONAL
   memorySize: 256
@@ -19,6 +19,26 @@ provider:
     SERVICE: ${self:service}-${sls:stage}
   environment:
     AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1'
+    API_URL: ${env:API_URL}
+    LOCAL_DDB: ${env:LOCAL_DDB,false}
+	
+custom:
+  serverless-dynamodb:
+    # If you only want to use DynamoDB Local in some stages, declare them here
+    stages:
+      - dev
+    start:
+      port: 8000
+      inMemory: true
+      heapInitial: 200m
+      heapMax: 1g
+      migrate: true
+      seed: false
+    seed:
+      dev:
+        sources:
+          - table: slots
+            sources: [./seeds/slots.json]
 
 functions:
   app:
@@ -38,3 +58,47 @@ functions:
               - X-Amz-User-Agent
             allowCredentials: true
     timeout: 25
+  cron:
+    handler: cron.handler
+    events:
+      - schedule:
+          rate: rate(30 minutes)
+
+resources:
+  Resources:
+    SlotsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: slots
+        AttributeDefinitions:
+          - AttributeName: slot_id
+            AttributeType: S
+          - AttributeName: start_date
+            AttributeType: S
+          - AttributeName: timestamp
+            AttributeType: S
+        KeySchema:
+          - AttributeName: slot_id
+            KeyType: HASH
+          - AttributeName: start_date
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TimeToLiveSpecification:
+          AttributeName: ttl
+          Enabled: true
+        GlobalSecondaryIndexes:
+          - IndexName: StartDateTimestampGSI
+            KeySchema:
+              - AttributeName: start_date
+                KeyType: HASH
+              - AttributeName: timestamp
+                KeyType: RANGE
+            Projection:
+              ProjectionType: INCLUDE
+              NonKeyAttributes:
+                - data
+            ProvisionedThroughput:
+              ReadCapacityUnits: 1
+              WriteCapacityUnits: 1

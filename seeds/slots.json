@@ -1,0 +1,54 @@
+[
+    {
+        "slot_id": "123",
+        "start_date": "2023-09-01",
+        "timestamp": "2023-09-01T19:30:00.000Z",
+        "ttl": 1695151800000,
+        "data": {
+            "id": "123",
+            "court": {
+                "clubId": "448",
+                "name": "ArenaSport"
+            }
+        }
+    },
+    {
+        "slot_id": "321",
+        "start_date": "2023-09-01",
+        "timestamp": "2023-09-01T21:00:00.000Z",
+        "ttl": 1695151800000,
+        "data": {
+            "id": "321",
+            "court": {
+                "clubId": "456",
+                "name": "StartPadel Indoor"
+            }
+        }
+    },
+    {
+        "slot_id": "987",
+        "start_date": "2023-09-01",
+        "timestamp": "2023-09-01T18:00:00.000Z",
+        "ttl": 1695151800000,
+        "data": {
+            "id": "987",
+            "court": {
+                "clubId": "369",
+                "name": "StartPadel Outdoor"
+            }
+        }
+    },
+    {
+        "slot_id": "876",
+        "start_date": "2023-09-02",
+        "timestamp": "2023-09-02T18:00:00.000Z",
+        "ttl": 1695151800000,
+        "data": {
+            "id": "876",
+            "court": {
+                "clubId": "542",
+                "name": "VCPadel"
+            }
+        }
+    }
+]
