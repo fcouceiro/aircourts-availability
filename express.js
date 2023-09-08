@@ -6,6 +6,7 @@ const { sweep } = require('./sweeper')
 
 const app = express()
 const airCourtsCoimbraClubs = require('./clubs-coimbra.json')
+const lambda = require('./aws/lambda')
 const coimbraClubIds = airCourtsCoimbraClubs.map((club) => club.id)
 
 app.set('view engine', 'ejs')
@@ -68,15 +69,15 @@ app.get('/day-availability', async (req, res) => {
 })
 
 app.get('/sweep', async (req, res) => {
-    const date = moment(req.query.date || new Date())
-    const dateQuery = date.format('YYYY-MM-DD')
-    const startTime = req.query.startTime || '12:00'
-
     try {
-        await sweep({ weekDate: dateQuery, startTime: startTime })
-        res.status(200).send('Done')
+        await lambda.invoke({
+            FunctionName: process.env.CRON_LAMBDA_NAME,
+            InvocationType: 'Event'
+        }).promise()
+        res.status(202).send('Enqueued')
     } catch (error) {
-        res.status(500).json(error)
+        console.error('Error invoking Lambda:', error);
+        res.status(500).send('Error')
     }
 })
 

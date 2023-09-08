@@ -21,6 +21,7 @@ provider:
     AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1'
     API_URL: ${env:API_URL}
     LOCAL_DDB: ${env:LOCAL_DDB,false}
+    CRON_LAMBDA_NAME: ${self:service}-${sls:stage}-cron
   iam:
     role:
       statements:
@@ -30,6 +31,10 @@ provider:
           Resource: 
            - 'arn:aws:dynamodb:eu-west-3:940279841315:table/slots'
            - 'arn:aws:dynamodb:eu-west-3:940279841315:table/slots/index/StartDateTimestampGSI'
+        - Effect: Allow
+          Action: 'lambda:InvokeFunction'
+          Resource: 
+           - arn:aws:lambda:eu-west-3:940279841315:function:${self:service}-${sls:stage}-cron
 
 package:
   patterns:
