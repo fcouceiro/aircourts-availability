@@ -21,6 +21,23 @@ provider:
     AWS_NODEJS_CONNECTION_REUSE_ENABLED: '1'
     API_URL: ${env:API_URL}
     LOCAL_DDB: ${env:LOCAL_DDB,false}
+  iam:
+    role:
+      statements:
+        # Allow functions to list all buckets
+        - Effect: Allow
+          Action: 'dynamodb:*'
+          Resource: 
+           - 'arn:aws:dynamodb:eu-west-3:940279841315:table/slots'
+           - 'arn:aws:dynamodb:eu-west-3:940279841315:table/slots/index/StartDateTimestampGSI'
+
+package:
+  exclude:
+    - .dynamodb/**
+    - .vscode/**
+    - diagrams/**
+    - sample.json
+    - seeds/**
 	
 custom:
   serverless-dynamodb:
@@ -82,9 +99,7 @@ resources:
             KeyType: HASH
           - AttributeName: start_date
             KeyType: RANGE
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
+        BillingMode: PAY_PER_REQUEST
         TimeToLiveSpecification:
           AttributeName: ttl
           Enabled: true
@@ -99,6 +114,3 @@ resources:
               ProjectionType: INCLUDE
               NonKeyAttributes:
                 - data
-            ProvisionedThroughput:
-              ReadCapacityUnits: 1
-              WriteCapacityUnits: 1
