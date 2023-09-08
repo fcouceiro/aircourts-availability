@@ -32,12 +32,12 @@ provider:
            - 'arn:aws:dynamodb:eu-west-3:940279841315:table/slots/index/StartDateTimestampGSI'
 
 package:
-  exclude:
-    - .dynamodb/**
-    - .vscode/**
-    - diagrams/**
-    - sample.json
-    - seeds/**
+  patterns:
+    - '!.dynamodb/**'
+    - '!.vscode/**'
+    - '!diagrams/**'
+    - '!sample.json'
+    - '!seeds/**'
 	
 custom:
   serverless-dynamodb:
