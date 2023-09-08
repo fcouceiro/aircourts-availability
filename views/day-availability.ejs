@@ -12,11 +12,18 @@
 
 <body>
     <form method="get">
-        <label for="weekDate">Date:</label>
+        <label for="date">Date:</label>
         <input type="date" id="date" name="date" value="<%= htmlWeekDate %>"><br><br>
         <input type="submit" value="Submit">
     </form>
     <%- include('sections/day-availability', {moment: moment, slots, date}); %>
+    <form method="post" action="sweep">
+        <label for="date">Date:</label>
+        <input type="date" id="date" name="date" value="<%= htmlWeekDate %>"><br><br>
+        <label for="date">Time:</label>
+        <input type="time" id="time" name="startTime" value="12:00"><br><br>
+        <input type="submit" value="Enqueue sweep">
+    </form>
 </body>
 
 </html>

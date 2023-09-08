@@ -11,6 +11,7 @@ const coimbraClubIds = airCourtsCoimbraClubs.map((club) => club.id)
 
 app.set('view engine', 'ejs')
 app.use(express.json())
+app.use(express.urlencoded())
 
 app.get('/week-availability/json', async (req, res) => {
     const mergedAvailabilities = await airCourtsWrapper.getClubsWeekAvailability({
@@ -68,11 +69,12 @@ app.get('/day-availability', async (req, res) => {
     }
 })
 
-app.get('/sweep', async (req, res) => {
+app.post('/sweep', async (req, res) => {
     try {
         await lambda.invoke({
             FunctionName: process.env.CRON_LAMBDA_NAME,
-            InvocationType: 'Event'
+            InvocationType: 'Event',
+            Payload: JSON.stringify({ date: req.body.date, startTime: req.body.startTime })
         }).promise()
         res.status(202).send('Enqueued')
     } catch (error) {
