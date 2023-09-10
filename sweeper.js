@@ -1,4 +1,5 @@
 const moment = require('moment')
+const { PromisePool } = require('@supercharge/promise-pool')
 
 const airCourtsWrapper = require('./index')
 const ddb = require('./aws/ddb')
@@ -52,8 +53,8 @@ const bulkUpsert = async (dataToUpsert) => {
         dataBatches.push(batch);
     }
 
-    // Perform batch upserts
-    const upsertPromises = dataBatches.map(batch => {
+    // Perform batch upserts with concurrency of 1 (serial execution)
+    const upsertParams = dataBatches.map(batch => {
         const batchWriteParams = {
             RequestItems: {
                 [tableName]: batch.map(item => ({
@@ -64,10 +65,16 @@ const bulkUpsert = async (dataToUpsert) => {
             },
         };
 
-        return ddb.batchWrite(batchWriteParams).promise();
+        return batchWriteParams
     });
 
-    return Promise.all(upsertPromises)
+
+    return PromisePool
+        .withConcurrency(1)
+        .for(upsertParams)
+        .process(async (batch) => {
+            return ddb.batchWrite(batch).promise();
+        })
 }
 
 module.exports = {
