@@ -82,6 +82,8 @@ functions:
     timeout: 25
   cron:
     handler: cron.handler
+    memorySize: 512
+    timeout: 12
     events:
       - schedule:
           rate: rate(30 minutes)
