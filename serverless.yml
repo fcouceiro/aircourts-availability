@@ -86,7 +86,7 @@ functions:
     timeout: 12
     events:
       - schedule:
-          rate: rate(30 minutes)
+          rate: rate(3 hours)
 
 resources:
   Resources:
