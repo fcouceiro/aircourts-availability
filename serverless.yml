@@ -49,6 +49,22 @@ provider:
       WebsiteConfiguration:
           IndexDocument: index.html
           ErrorDocument: index.html
+      LifecycleConfiguration:
+        Rules:
+          - Id: GlacierRuleHtml
+            Prefix: html
+            Status: Enabled
+            ExpirationInDays: 15
+            Transitions:
+              - TransitionInDays: 10
+                StorageClass: GLACIER
+          - Id: GlacierRuleData
+            Prefix: data
+            Status: Enabled
+            ExpirationInDays: 15
+            Transitions:
+              - TransitionInDays: 10
+                StorageClass: GLACIER
 
 package:
   patterns:
