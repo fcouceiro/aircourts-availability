@@ -8,6 +8,7 @@ plugins:
 
 provider:
   name: aws
+  deploymentMethod: direct
   runtime: nodejs16.x
   region: eu-west-3
   endpointType: REGIONAL
@@ -22,6 +23,7 @@ provider:
     API_URL: ${env:API_URL}
     LOCAL_DDB: ${env:LOCAL_DDB,false}
     CRON_LAMBDA_NAME: ${self:service}-${sls:stage}-cron
+    BUCKET_NAME: ${self:service}-${sls:stage}-bucket
   iam:
     role:
       statements:
@@ -35,6 +37,18 @@ provider:
           Action: 'lambda:InvokeFunction'
           Resource: 
            - arn:aws:lambda:eu-west-3:940279841315:function:${self:service}-${sls:stage}-cron
+        - Effect: Allow
+          Action: 
+           - 's3:GetObject'
+           - 's3:PutObject'
+          Resource: 
+           - arn:aws:s3:::${self:service}-${sls:stage}-bucket/*
+  s3:
+    bucketCommon:
+      name: ${self:service}-${sls:stage}-bucket
+      WebsiteConfiguration:
+          IndexDocument: index.html
+          ErrorDocument: index.html
 
 package:
   patterns:
@@ -87,6 +101,17 @@ functions:
     events:
       - schedule:
           rate: rate(3 hours)
+  renderHtml:
+    handler: render-html.handler
+    memorySize: 512
+    timeout: 25
+    events:
+      - s3:
+          bucket: bucketCommon
+          event: s3:ObjectCreated:*
+          rules:
+            - prefix: data/
+            - suffix: .json
 
 resources:
   Resources:

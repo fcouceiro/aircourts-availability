@@ -14,7 +14,7 @@
                 <td><%= slot.data.court.clubName %></td>
                 <td><%= slot.data.court.name %></td>
                 <td>
-                    <a href="https://www.aircourts.com/index.php/site/view_club/<%= slot.data.court.clubId %>/<%= date %>/<%= slot.start_date %>" target="_blank">reservar</a>
+                    <a href="https://www.aircourts.com/index.php/site/view_club/<%= slot.data.court.clubId %>/<%= date %>/<%= datetime.format('HH:mm') %>" target="_blank">reservar</a>
                 </td>
             </tr>
         <% }) %>

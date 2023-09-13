@@ -85,6 +85,8 @@ app.post('/sweep', async (req, res) => {
 
 app.get('/', (req, res) => res.render('index'))
 
+app.get('/home', (req, res) => res.redirect('https://aircourts-availability-test-bucket.s3.eu-west-3.amazonaws.com/index.html'))
+
 module.exports = {
     app
 }

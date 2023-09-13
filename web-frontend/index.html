@@ -1,0 +1,45 @@
+<!doctype html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>AirCourts
+    </title>
+</head>
+
+<body>
+    <h1>Find slots</h1>
+    <form id="find-form">
+        <label for="date">Date:</label>
+        <input type="date" id="date" name="date"><br><br>
+        <input type="submit" value="Search">
+    </form>
+
+    <br>
+    <br>
+    <h2>Force sweeping</h2>
+    <form method="post" action="https://aircourts.fcouceiro.com/sweep">
+        <label for="date">Date:</label>
+        <input type="date" id="date" name="date"><br><br>
+        <label for="date">Start time:</label>
+        <input type="time" id="time" name="startTime" value="12:00"><br><br>
+        <input type="submit" value="Enqueue sweep">
+    </form>
+
+    <script>
+        document.getElementById('find-form').addEventListener('submit', function (evt) {
+            evt.preventDefault()
+            const formData = new FormData(evt.target);
+            const { date } = Object.fromEntries(formData)
+
+            if (date) {
+                window.location.href = 'https://' + window.location.hostname + '/html/' + date + '.html'
+            }
+        })
+    </script>
+</body>
+
+</html>

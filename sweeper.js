@@ -1,8 +1,10 @@
 const moment = require('moment')
 const { PromisePool } = require('@supercharge/promise-pool')
+const { groupBy, prop, sortBy } = require('ramda')
 
 const airCourtsWrapper = require('./index')
 const ddb = require('./aws/ddb')
+const { s3, BUCKET_NAME } = require('./aws/s3')
 
 const airCourtsCoimbraClubs = require('./clubs-coimbra.json')
 const coimbraClubIds = airCourtsCoimbraClubs.map((club) => club.id)
@@ -39,7 +41,14 @@ const sweep = async ({ weekDate, startTime } = {}) => {
         }
     })
 
-    await bulkUpsert(upsertData)
+    const sortedUpsertData = sortBy(prop('ttl'))(upsertData)
+
+    //await sendToDDB(upsertData, availabilities)
+    await sendToS3(sortedUpsertData, availabilities)
+}
+
+const sendToDDB = async (upsertData, availabilities) => {
+    return bulkUpsert(upsertData)
 }
 
 const bulkUpsert = async (dataToUpsert) => {
@@ -75,6 +84,41 @@ const bulkUpsert = async (dataToUpsert) => {
         .process(async (batch) => {
             return ddb.batchWrite(batch).promise();
         })
+}
+
+const sendToS3 = async (upsertData, availabilities) => {
+    const dataByDate = groupBy(prop('start_date'))(upsertData)
+    return batchWriteJsonToS3(dataByDate, BUCKET_NAME)
+}
+
+const batchWriteJsonToS3 = async (jsonObject, bucketName) => {
+    // Iterate through each date key in the JSON object
+    const upsertParams = Object.keys(jsonObject).map(date => {
+        const jsonContent = jsonObject[date];
+        const fileName = `data/${date}.json`;
+
+        // Convert the JSON content to a string
+        const jsonString = JSON.stringify(jsonContent);
+
+        // Define the S3 object parameters
+        const s3Params = {
+            Bucket: bucketName,
+            Key: fileName,
+            Body: jsonString,
+            ContentType: 'application/json',
+        };
+        return s3Params
+    })
+
+    return PromisePool
+        .withConcurrency(3)
+        .for(upsertParams)
+        .process(async (s3Params) => {
+            // Upload the JSON content to S3
+            await s3.upload(s3Params).promise();
+            console.log(`Uploaded ${s3Params.Key} to S3`);
+        })
+
 }
 
 module.exports = {
