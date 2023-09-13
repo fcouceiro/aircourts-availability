@@ -6,11 +6,11 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>AirCourts - <%= date %>
-    </title>
+    <title>AirCourts - <%= date %></title>
 </head>
 
 <body>
+    <p>Updated at <%= (new Date()).toISOString() %></p>
     <%- include('sections/day-availability', {moment: moment, slots, date}); %>
 </body>
 
