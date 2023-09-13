@@ -96,7 +96,7 @@ async function getClubAvailability({ clubId, date, startTime, sport }) {
 }
 
 async function getClubsWeekAvailability({ clubIds, weekDate, startTime, sport }) {
-    const weekDays = dateUtils.weekDays(weekDate)
+    const weekDays = dateUtils.next(7, weekDate)
 
     // Request club availability for each week day
     const inflightOps = weekDays.reduce((promises, weekDay) => {
