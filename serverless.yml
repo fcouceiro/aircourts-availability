@@ -100,7 +100,7 @@ functions:
     timeout: 12
     events:
       - schedule:
-          rate: rate(3 hours)
+          rate: rate(15 minutes)
   renderHtml:
     handler: render-html.handler
     memorySize: 512
