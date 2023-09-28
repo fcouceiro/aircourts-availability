@@ -133,19 +133,8 @@ functions:
     events:
       - schedule:
           rate: rate(15 minutes)
-  renderHtml:
-    handler: render-html.handler
-    memorySize: 512
-    timeout: 25
-    events:
-      - s3:
-          bucket: bucketCommon
-          event: s3:ObjectCreated:*
-          rules:
-            - prefix: data/
-            - suffix: .json
-  differ:
-    handler: differ.handler
+  s3DataCapture:
+    handler: s3-data-capture.handler
     memorySize: 512
     timeout: 25
     events:

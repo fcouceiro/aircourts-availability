@@ -1,4 +1,3 @@
-const { PromisePool } = require('@supercharge/promise-pool')
 const ejs = require('ejs')
 const moment = require('moment')
 const { s3, BUCKET_NAME } = require('./aws/s3');
@@ -59,28 +58,16 @@ const writeHtmlFile = async (html, fileName, bucketName) => {
   }
 }
 
-module.exports.handler = async (event, context) => {
-  await PromisePool
-    .withConcurrency(1)
-    .for(event?.Records || [])
-    .process(async (s3Record) => {
-      try {
+const run = async (s3Record) => {
+  // Upload the JSON content to S3
+  const { lastObjectKeyPart, jsonObject } = await getAndParseFile(s3Record)
+  console.log('Parsed JSON:', { lastObjectKeyPart });
 
-        // Upload the JSON content to S3
-        const { lastObjectKeyPart, jsonObject } = await getAndParseFile(s3Record)
-        console.log('Parsed JSON:', { lastObjectKeyPart });
+  const filename = lastObjectKeyPart.replace('.json', '')
+  const renderedContent = await renderFile(jsonObject, filename)
+  await writeHtmlFile(renderedContent, `html/${filename}.html`, BUCKET_NAME)
+}
 
-        // TODO: render file and put on S3
-        const filename = lastObjectKeyPart.replace('.json', '')
-        const renderedContent = await renderFile(jsonObject, filename)
-        await writeHtmlFile(renderedContent, `html/${filename}.html`, BUCKET_NAME)
-      } catch (error) {
-        console.log(error)
-      }
-    })
-
-  return {
-    statusCode: 200,
-    body: 'File processed successfully',
-  };
-};
+module.exports = {
+  run
+}

@@ -1,10 +1,9 @@
-const { PromisePool } = require('@supercharge/promise-pool')
 const Diff = require('diff')
 const { s3, BUCKET_NAME } = require('./aws/s3');
 
 const KEEP_VERSIONS = 2
 
-const processS3Record = async (eventRecord) => {
+const run = async (eventRecord) => {
   // Get the S3 event record from the event payload
   const s3Record = eventRecord?.s3;
   if (!s3Record) {
@@ -141,20 +140,6 @@ const writeDiffFile = async (data, fileName, bucketName) => {
   }
 }
 
-module.exports.handler = async (event, context) => {
-  await PromisePool
-    .withConcurrency(1)
-    .for(event?.Records || [])
-    .process(async (s3Record) => {
-      try {
-        await processS3Record(s3Record)
-      } catch (error) {
-        console.log(error)
-      }
-    })
-
-  return {
-    statusCode: 200,
-    body: 'File processed successfully',
-  };
-};
+module.exports = {
+  run
+}
