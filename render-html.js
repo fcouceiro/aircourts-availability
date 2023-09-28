@@ -64,14 +64,19 @@ module.exports.handler = async (event, context) => {
     .withConcurrency(1)
     .for(event?.Records || [])
     .process(async (s3Record) => {
-      // Upload the JSON content to S3
-      const { lastObjectKeyPart, jsonObject } = await getAndParseFile(s3Record)
-      console.log('Parsed JSON:', { lastObjectKeyPart });
+      try {
 
-      // TODO: render file and put on S3
-      const filename = lastObjectKeyPart.replace('.json', '')
-      const renderedContent = await renderFile(jsonObject, filename)
-      await writeHtmlFile(renderedContent, `html/${filename}.html`, BUCKET_NAME)
+        // Upload the JSON content to S3
+        const { lastObjectKeyPart, jsonObject } = await getAndParseFile(s3Record)
+        console.log('Parsed JSON:', { lastObjectKeyPart });
+
+        // TODO: render file and put on S3
+        const filename = lastObjectKeyPart.replace('.json', '')
+        const renderedContent = await renderFile(jsonObject, filename)
+        await writeHtmlFile(renderedContent, `html/${filename}.html`, BUCKET_NAME)
+      } catch (error) {
+        console.log(error)
+      }
     })
 
   return {

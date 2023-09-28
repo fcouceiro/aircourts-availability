@@ -41,8 +41,15 @@ provider:
           Action: 
            - 's3:GetObject'
            - 's3:PutObject'
+           - 's3:DeleteObject'
+           - 's3:DeleteObjectVersion'
           Resource: 
            - arn:aws:s3:::${self:service}-${sls:stage}-bucket/*
+        - Effect: Allow
+          Action: 
+           - 's3:ListBucketVersions'
+          Resource: 
+           - arn:aws:s3:::${self:service}-${sls:stage}-bucket
   s3:
     bucketCommon:
       name: ${self:service}-${sls:stage}-bucket
@@ -65,6 +72,15 @@ provider:
             Transitions:
               - TransitionInDays: 10
                 StorageClass: GLACIER
+          - Id: GlacierRuleDiff
+            Prefix: diff
+            Status: Enabled
+            ExpirationInDays: 15
+            Transitions:
+              - TransitionInDays: 10
+                StorageClass: GLACIER
+      VersioningConfiguration:
+          Status: Enabled
 
 package:
   patterns:
@@ -119,6 +135,17 @@ functions:
           rate: rate(15 minutes)
   renderHtml:
     handler: render-html.handler
+    memorySize: 512
+    timeout: 25
+    events:
+      - s3:
+          bucket: bucketCommon
+          event: s3:ObjectCreated:*
+          rules:
+            - prefix: data/
+            - suffix: .json
+  differ:
+    handler: differ.handler
     memorySize: 512
     timeout: 25
     events:

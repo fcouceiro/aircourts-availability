@@ -9,7 +9,7 @@
     "offline": "sls offline -s test",
     "deploy": "sls deploy -s test",
     "debug": "node --inspect node_modules/serverless/bin/serverless offline start --stage dev",
-    "s3-event": "node --inspect-brk node_modules/serverless/bin/serverless invoke local -f renderHtml -p s3-event.json",
+    "s3-event": "node --inspect-brk node_modules/serverless/bin/serverless invoke local -f differ -p s3-event.json",
     "cron": "node --inspect node_modules/serverless/bin/serverless invoke local -f cron"
   },
   "author": "",
@@ -17,6 +17,7 @@
   "dependencies": {
     "@supercharge/promise-pool": "^3.0.0",
     "axios": "^0.26.1",
+    "diff": "^5.1.0",
     "ejs": "^3.1.7",
     "express": "^4.17.3",
     "moment": "^2.29.3",
