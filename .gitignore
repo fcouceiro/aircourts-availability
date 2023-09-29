@@ -5,4 +5,6 @@ node_modules/
 .DS_Store
 sample.json
 s3-event.json
+s3-notifier-event.json
 diagrams/
+.env.test

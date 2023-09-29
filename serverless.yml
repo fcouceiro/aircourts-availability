@@ -24,6 +24,8 @@ provider:
     LOCAL_DDB: ${env:LOCAL_DDB,false}
     CRON_LAMBDA_NAME: ${self:service}-${sls:stage}-cron
     BUCKET_NAME: ${self:service}-${sls:stage}-bucket
+    SLACK_TOKEN: ${env:SLACK_TOKEN}
+    SLACK_CHANNEL: ${env:SLACK_CHANNEL}
   iam:
     role:
       statements:
@@ -145,6 +147,17 @@ functions:
           event: s3:ObjectCreated:*
           rules:
             - prefix: data/
+            - suffix: .json
+  notifier:
+    handler: notifier.handler
+    memorySize: 512
+    timeout: 25
+    events:
+      - s3:
+          bucket: bucketCommon
+          event: s3:ObjectCreated:*
+          rules:
+            - prefix: diff/
             - suffix: .json
 
 resources:
