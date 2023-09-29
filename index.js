@@ -55,8 +55,10 @@ function unprojectSearchWithClubResults(courts, config = {
                 return
             }
 
-            slotsById[slot.id] = {
-                id: slot.id,
+            const slotGID = [court.id, slot.date, slot.start].join('#')
+
+            slotsById[slotGID] = {
+                id: slotGID,
                 date: slot.date,
                 start: slot.start,
                 end: slot.end,
@@ -66,7 +68,7 @@ function unprojectSearchWithClubResults(courts, config = {
             if (!refSlotsByDate[slot.date]) {
                 refSlotsByDate[slot.date] = []
             }
-            refSlotsByDate[slot.date].push(slot.id)
+            refSlotsByDate[slot.date].push(slotGID)
         })
     })
 
