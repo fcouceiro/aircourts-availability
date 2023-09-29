@@ -8,7 +8,9 @@ const slack = new Slack.WebClient(TOKEN_BOT)
 const notify = (message) => {
     return slack.chat.postMessage({
         channel: CHANNEL,
-        text: message
+        text: message,
+        unfurl_links: false,
+        unfurl_media: false
     })
 }
 

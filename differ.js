@@ -49,7 +49,14 @@ const run = async (eventRecord) => {
   }
 
   const writeDiffDataToS3 = async () => {
-    const data = JSON.stringify({ diffedAt: (new Date().toISOString()), ...diffData })
+    // Only writing "added slots" for now.
+    // Consider moving both added and removed to an SNS topic
+
+    if (diffData.addedSlots.length === 0) {
+      return console.log("Added slots count is zero - skipping upload")
+    }
+
+    const data = JSON.stringify({ diffedAt: (new Date().toISOString()), addedSlots: diffData.addedSlots })
     return writeDiffFile(data, `diff/${fileName}`, BUCKET_NAME)
   }
 

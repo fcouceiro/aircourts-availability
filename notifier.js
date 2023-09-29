@@ -1,6 +1,8 @@
 const { PromisePool } = require('@supercharge/promise-pool')
 const { s3 } = require('./aws/s3');
 const { notify } = require('./slack');
+const { propOr } = require('ramda');
+const moment = require('moment')
 
 const run = async (eventRecord) => {
   // Get the S3 event record from the event payload
@@ -21,19 +23,31 @@ const run = async (eventRecord) => {
   const diffObject = JSON.parse(fileContent);
 
   const addedSlotsCount = diffObject.addedSlots?.length || 0
-  const removedSlotsCount = diffObject.removedSlots?.length || 0
-  
-  if (addedSlotsCount === 0 && removedSlotsCount === 0) {
+
+  if (addedSlotsCount === 0) {
     return console.log('Slots did not change - exit')
   }
 
-  const slackMessage = renderMessage(diffObject, fileName)
+  const date = fileName.replace('.json', '')
+  const slackMessage = renderMessage(diffObject, date)
 
   return notify(slackMessage)
 }
 
-const renderMessage = (diff, slotName) => {
-  return `📡 *${slotName}*\n🆕 slots: ${diff?.addedSlots?.length || 0}\n🔻 ${diff?.removedSlots?.length || 0}`
+const renderMessage = (diff, date) => {
+  const slots = propOr([], 'addedSlots')(diff)
+  const slotsMessage = slots.map(slot => {
+    const datetime = moment(slot.timestamp)
+
+    const time = datetime.format('HH:mm')
+    
+    
+    const link = `https://www.aircourts.com/index.php/site/view_club/${slot.data.court.clubId}/${date}/${time}`
+
+    return ['🟢', time, slot.data.court.clubName, '-', slot.data.court.name, `<${link}|🔗 Book>`].join(' ')
+  })
+
+  return `📡 *${date}*\n🆕 slots: ${diff?.addedSlots?.length || 0}\n\n${slotsMessage.join('\n\n')}`
 }
 
 module.exports.handler = async (event, context) => {
