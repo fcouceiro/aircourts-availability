@@ -9,7 +9,7 @@
     "offline": "sls offline -s test",
     "deploy": "sls deploy -s test",
     "debug": "node --inspect node_modules/serverless/bin/serverless offline start --stage dev",
-    "s3-event": "node --inspect-brk node_modules/serverless/bin/serverless invoke local -f differ -p s3-event.json",
+    "s3-event": "node --inspect-brk node_modules/serverless/bin/serverless invoke local -f s3DataCapture -p s3-event.json --stage test",
     "cron": "node --inspect node_modules/serverless/bin/serverless invoke local -f cron"
   },
   "author": "",
