@@ -1,0 +1,31 @@
+<!doctype html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>AirCourts - Notification
+    </title>
+</head>
+
+<body>
+    <form method="post" action="subscriptions">
+        <label for="date">Date:</label>
+        <input type="date" id="date" name="date" value="<%= htmlWeekDate %>"><br><br>
+        <label for="afterTime">Window start time:</label>
+        <input type="time" id="afterTime" name="afterTime" value="18:00"><br><br>
+        <label for="beforeTime">Window end time:</label>
+        <input type="time" id="beforeTime" name="beforeTime" value="22:00"><br><br>
+        <label for="clubIds">Clubs:</label>
+        <select name="clubIds" id="clubIds" multiple>
+            <% clubs.map((club)=> { %>
+                <option value="<%= club.id %>"><%= club.name %></option>
+            <% }) %>
+        </select>
+        <input type="submit" value="Submit">
+    </form>
+</body>
+
+</html>

@@ -1,7 +1,7 @@
 const { PromisePool } = require('@supercharge/promise-pool')
-const { s3 } = require('./aws/s3');
+const { s3, BUCKET_NAME } = require('./aws/s3');
 const { notify } = require('./slack');
-const { propOr } = require('ramda');
+const { propOr, pluck, path, pipe, map, uniq, flatten, groupBy, prop, indexBy, values } = require('ramda');
 const moment = require('moment')
 
 const run = async (eventRecord) => {
@@ -17,51 +17,135 @@ const run = async (eventRecord) => {
   const objectKey = decodeURIComponent(s3Record.object.key);
   const objectKeyParts = objectKey.split('/')
   const fileName = objectKeyParts.length > 0 ? objectKeyParts[objectKeyParts.length - 1] : 'no-name.json'
+  const date = fileName.replace('.json', '')
 
   const object = await s3.getObject({ Bucket: bucketName, Key: objectKey }).promise()
   const fileContent = object.Body.toString('utf-8');
   const diffObject = JSON.parse(fileContent);
 
-  const addedSlotsCount = diffObject.addedSlots?.length || 0
+  const addedSlots = propOr([], 'addedSlots')(diffObject)
 
-  if (addedSlotsCount === 0) {
+  if (addedSlots.length === 0) {
     return console.log('Slots did not change - exit')
   }
 
-  const date = fileName.replace('.json', '')
-  const slackMessage = renderMessage(diffObject, date)
-
-  return notify(slackMessage)
+  const slotsBySubscription = await groupSlotsBySubscription(addedSlots, date)
+  const renderedSlots = slotsBySubscription.map((group) => {
+    return {
+      receiver: group.receiver,
+      markdown: renderMessage(group.slots, group.date)
+    }
+  })
+  return dispatchMessages(renderedSlots)
 }
 
-const renderMessage = (diff, date) => {
-  const slots = propOr([], 'addedSlots')(diff)
+const groupSlotsBySubscription = async (slots, date) => {
+  const getUniqueClubIds = pipe(map(path(['data', 'court', 'clubId'])), uniq)
+  const clubIds = getUniqueClubIds(slots)
+
+  const referencedSubscriptions = await Promise.all(clubIds.map(async (clubId) => {
+    const prefixQuery = `subscriptions/by-date-and-club/${date}/${clubId}/`
+    const { Contents } = await s3.listObjectsV2({
+      Bucket: BUCKET_NAME,
+      Prefix: prefixQuery,
+      Delimiter: '/'
+    }).promise()
+
+    const subscriptionReferences = Contents.filter(ref => ref.Size > 0)
+
+    return subscriptionReferences.map(ref => {
+      return {
+        clubId,
+        subscriptionId: ref.Key.replace(prefixQuery, '')
+      }
+    })
+  }))
+
+  const getUniqueSubscriptionIds = pipe(flatten, pluck('subscriptionId'), uniq)
+  const subscriptionIdsToLoad = getUniqueSubscriptionIds(referencedSubscriptions)
+  const clubSubscriptionsMap = pipe(flatten, groupBy(prop('clubId')))(referencedSubscriptions)
+  const subscriptions = await getSupscriptions(subscriptionIdsToLoad)
+  const subscriptionsById = indexBy(prop('id'))(subscriptions)
+
+  slots.forEach(slot => {
+    const subscriptionsRefs = clubSubscriptionsMap[slot.data.court.clubId]
+    if (!subscriptionsRefs || subscriptionsRefs.length === 0) {
+      return {
+        ...slot,
+        receivers: []
+      }
+    }
+
+    const subscriptions = subscriptionsRefs.map(ref => subscriptionsById[ref.subscriptionId])
+    const datetime = moment(slot.timestamp)
+
+    const filteredSubscriptions = subscriptions.filter(sub => datetime >= sub.window.gteTime && datetime <= sub.window.lteTime)
+
+    filteredSubscriptions.forEach(subscription => {
+      if (!('slots' in subscription)) {
+        subscription.slots = []
+      }
+      subscription.slots.push(slot)
+    })
+  })
+
+  return values(subscriptionsById)
+}
+
+const getSupscriptions = async (ids) => {
+  const { results } = await PromisePool
+    .withConcurrency(4)
+    .for(ids)
+    .process(async (id) => {
+      const key = `subscriptions/by-id/${id}`
+      const object = await s3.getObject({ Bucket: BUCKET_NAME, Key: key }).promise()
+      const fileContent = object.Body.toString('utf-8');
+      const subscription = JSON.parse(fileContent);
+
+      subscription.window.gteTime = moment(`${subscription.date} ${subscription.window.gteTime}`)
+      subscription.window.lteTime = moment(`${subscription.date} ${subscription.window.lteTime}`)
+
+      return {
+        ...subscription,
+        id,
+      }
+    })
+
+  return results
+}
+
+const renderMessage = (slots, date) => {
   const slotsMessage = slots.map(slot => {
     const datetime = moment(slot.timestamp)
 
     const time = datetime.format('HH:mm')
-    
-    
+
+
     const link = `https://www.aircourts.com/index.php/site/view_club/${slot.data.court.clubId}/${date}/${time}`
 
     return ['🟢', time, slot.data.court.clubName, '-', slot.data.court.name, `<${link}|🔗 Book>`].join(' ')
   })
 
-  return `📡 *${date}*\n🆕 slots: ${diff?.addedSlots?.length || 0}\n\n${slotsMessage.join('\n\n')}`
+  return `📡 *${date}*\n🆕 slots: ${slots.length}\n\n${slotsMessage.join('\n\n')}`
+}
+
+const dispatchMessages = (messages) => {
+  return PromisePool.withConcurrency(2)
+    .for(messages)
+    .process((message) => {
+      // TODO: create dispatcher factory based on receiver type
+      return notify(message.markdown, message.receiver.channel)
+    })
 }
 
 module.exports.handler = async (event, context) => {
-  await PromisePool
+  const { results, errors } = await PromisePool
     .withConcurrency(1)
     .for(event?.Records || [])
-    .process(async (s3Record) => {
-      try {
-        await run(s3Record)
-      } catch (error) {
-        console.log(error)
-      }
-    })
+    .process((s3Record) => run(s3Record))
 
+  console.log('Results:', results)
+  console.log('Errors:', errors)
   return {
     statusCode: 200,
     body: 'File processed successfully',

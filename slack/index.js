@@ -5,9 +5,9 @@ const CHANNEL = process.env.SLACK_CHANNEL
 
 const slack = new Slack.WebClient(TOKEN_BOT)
 
-const notify = (message) => {
+const notify = (message, channel = CHANNEL) => {
     return slack.chat.postMessage({
-        channel: CHANNEL,
+        channel,
         text: message,
         unfurl_links: false,
         unfurl_media: false
@@ -15,5 +15,6 @@ const notify = (message) => {
 }
 
 module.exports = {
-    notify
+    notify,
+    CHANNEL
 }

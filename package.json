@@ -8,7 +8,7 @@
     "start": "node local.js",
     "offline": "sls offline -s test",
     "deploy": "sls deploy -s test",
-    "debug": "node --inspect node_modules/serverless/bin/serverless offline start --stage dev",
+    "debug": "node --inspect node_modules/serverless/bin/serverless offline start --stage test",
     "s3-event": "node --inspect-brk node_modules/serverless/bin/serverless invoke local -f s3DataCapture -p s3-event.json --stage test",
     "notifier-event": "node --inspect-brk node_modules/serverless/bin/serverless invoke local -f notifier -p s3-notifier-event.json --stage test",
     "cron": "node --inspect node_modules/serverless/bin/serverless invoke local -f cron"
@@ -23,6 +23,7 @@
     "ejs": "^3.1.7",
     "express": "^4.17.3",
     "moment": "^2.29.3",
+    "nanoid": "^3.3.6",
     "ramda": "^0.29.0",
     "serverless-http": "^3.0.1"
   },
