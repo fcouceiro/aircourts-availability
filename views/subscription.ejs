@@ -6,11 +6,22 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>AirCourts - Notification
+    <title>ElCourts - Get notified
     </title>
 </head>
 
 <body>
+    Notifications are currently only available through Slack. Make sure to join (install the app on your device):
+    <br>
+    <a target="_blank"
+        href="https://join.slack.com/t/padel-r5g6339/shared_invite/zt-245pfzsrn-Ib8oLmwbTg0EBv9BPbLZmQ"><img
+            src="https://previews.us-east-1.widencdn.net/preview/48045879/assets/asset-view/0cece34e-cbb7-4c6f-be3e-d475baeb3a8d/thumbnail/eyJ3IjoyMDQ4LCJoIjoyMDQ4LCJzY29wZSI6ImFwcCJ9?Expires=1698192000&Signature=BshaUPhY5ADeWjmCZlrgfhArCU-U4hqWmZlpl0BXpICpst-kb0piI8RCdxCi~rkiq0gtwqQEcJty8vPIewS-MRGMq09biWJUEIXitM6EGQWNMYQ-Af~yxAkguySMx4XFMltk22pBbwhCWlXJYOnfCq381U3I3340EOBKGhCvIsZuVEv5ebhOfxBhFA7HaPTX8luUiBWRHfkztl3NwohBIWfvGk1Jz-21qb2zJS69z6xdwqH5Tl2xGayldZhRlyaJ~4820kcwzxqfIrRmIR~AIrKhjForj1tkJIadYmYwk2mY09ytlUpJFYQK5abi56bsKIPyxhG1LYrTkBWPPHuBpQ__&Key-Pair-Id=APKAJM7FVRD2EPOYUXBQ"
+            style="width:35px;height:35px;">Join notifications channel</a>
+
+    <br>
+    <br>
+
+    <h1>Get notified when a slot becomes available</h1>
     <form method="post" action="subscriptions">
         <label for="date">Date:</label>
         <input type="date" id="date" name="date" value="<%= htmlWeekDate %>"><br><br>
@@ -21,9 +32,12 @@
         <label for="clubIds">Clubs:</label>
         <select name="clubIds" id="clubIds" multiple>
             <% clubs.map((club)=> { %>
-                <option value="<%= club.id %>"><%= club.name %></option>
-            <% }) %>
+                <option value="<%= club.id %>">
+                    <%= club.name %>
+                </option>
+                <% }) %>
         </select>
+        <br>
         <input type="submit" value="Submit">
     </form>
 </body>
