@@ -97,12 +97,10 @@ async function getClubAvailability({ clubId, date, startTime, sport }) {
     return unprojectSearchWithClubResults(data.results)
 }
 
-async function getClubsWeekAvailability({ clubIds, weekDate, startTime, sport }) {
-    const weekDays = dateUtils.next(7, weekDate)
-
+async function getClubsAvailability({ clubIds, weekDays, startTime, sport }) {
     // Request club availability for each week day
     const inflightOps = weekDays.reduce((promises, weekDay) => {
-        const ops = clubIds.map((id) => this.getClubAvailability({
+        const ops = clubIds.map((id) => getClubAvailability({
             clubId: id,
             date: weekDay,
             startTime: startTime || '19:00',
@@ -139,7 +137,12 @@ async function getClubsWeekAvailability({ clubIds, weekDate, startTime, sport })
     return mergedAvailabilities
 }
 
+async function getClubsWeekAvailability({ weekDate, ...params }) {
+    const weekDays = dateUtils.next(7, weekDate)
+    return getClubsAvailability({ weekDays, ...params })
+}
+
 module.exports = {
     getClubAvailability,
-    getClubsWeekAvailability
+    getClubsAvailability,
 }

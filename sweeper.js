@@ -1,18 +1,29 @@
 const moment = require('moment')
 const { PromisePool } = require('@supercharge/promise-pool')
-const { groupBy, prop, sortBy } = require('ramda')
+const { groupBy, prop, sortBy, uniq, flatten } = require('ramda')
 
 const airCourtsWrapper = require('./index')
 const ddb = require('./aws/ddb')
 const { s3, BUCKET_NAME } = require('./aws/s3')
 
 const airCourtsCoimbraClubs = require('./clubs-coimbra.json')
+const { getSubscribedDates } = require('./notifier')
+const dateUtils = require('./date-utils')
+
 const coimbraClubIds = airCourtsCoimbraClubs.map((club) => club.id)
 
 const sweep = async ({ weekDate, startTime } = {}) => {
-    const availabilities = await airCourtsWrapper.getClubsWeekAvailability({
+    const { validDates } = await getSubscribedDates()
+    const nextWeekDays = dateUtils.next(7, weekDate)
+    const weekDays = uniq(flatten([validDates, nextWeekDays])).sort()
+
+    await processAvailabilities(weekDays, startTime)
+}
+
+const processAvailabilities = async (weekDays, startTime) => {
+    const availabilities = await airCourtsWrapper.getClubsAvailability({
         clubIds: coimbraClubIds,
-        weekDate: weekDate,
+        weekDays,
         startTime: startTime,
         sport: 4 // Padel
     })

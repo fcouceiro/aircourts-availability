@@ -26,6 +26,8 @@ provider:
     BUCKET_NAME: ${self:service}-${sls:stage}-bucket
     SLACK_TOKEN: ${env:SLACK_TOKEN}
     SLACK_CHANNEL: ${env:SLACK_CHANNEL}
+    NUMBER_OF_DAYS_SWEEP: 7
+    NUMBER_OF_DAYS_SUBSCRIPTION: 30
   iam:
     role:
       statements:
@@ -82,6 +84,13 @@ provider:
             ExpirationInDays: 15
             Transitions:
               - TransitionInDays: 10
+                StorageClass: GLACIER
+          - Id: GlacierRuleSubscriptions
+            Prefix: subscriptions
+            Status: Enabled
+            ExpirationInDays: 40
+            Transitions:
+              - TransitionInDays: 35
                 StorageClass: GLACIER
       VersioningConfiguration:
           Status: Enabled

@@ -151,3 +151,37 @@ module.exports.handler = async (event, context) => {
     body: 'File processed successfully',
   };
 };
+
+const getSubscribedDates = async () => {
+  const prefixQuery = `subscriptions/by-date-and-club/`
+  const { CommonPrefixes } = await s3.listObjectsV2({
+    Bucket: BUCKET_NAME,
+    Prefix: prefixQuery,
+    Delimiter: '/'
+  }).promise()
+
+
+
+  const subscriptionReferences = CommonPrefixes.reduce((arr, { Prefix: prefix }) => {
+    const results = /subscriptions\/by-date-and-club\/([0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9])\//gm.exec(prefix)
+    if (results.length > 1) {
+      return [...arr, results[1]]
+    }
+    console.log('Failed to parse Prefix', prefix)
+    return arr
+  }, [])
+
+  const today = moment().format('YYYY-MM-DD')
+  const dates = uniq(subscriptionReferences)
+  return dates.reduce((obj, date) => {
+    const momDate = moment(date)
+    const isOld = momDate.isBefore(today, 'day')
+    
+    if (!isOld) {
+      obj.validDates.push(date)
+    }
+    return obj
+  }, { oldDates: [], validDates: []})
+}
+
+module.exports.getSubscribedDates = getSubscribedDates

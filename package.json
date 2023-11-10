@@ -11,7 +11,7 @@
     "debug": "node --inspect node_modules/serverless/bin/serverless offline start --stage test",
     "s3-event": "node --inspect-brk node_modules/serverless/bin/serverless invoke local -f s3DataCapture -p s3-event.json --stage test",
     "notifier-event": "node --inspect-brk node_modules/serverless/bin/serverless invoke local -f notifier -p s3-notifier-event.json --stage test",
-    "cron": "node --inspect node_modules/serverless/bin/serverless invoke local -f cron"
+    "cron": "node --inspect-brk node_modules/serverless/bin/serverless invoke local -f cron -p s3-notifier-event.json --stage test"
   },
   "author": "",
   "license": "ISC",
