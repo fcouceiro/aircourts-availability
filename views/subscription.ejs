@@ -23,8 +23,8 @@
 
     <h1>Get notified when a slot becomes available</h1>
     <form method="post" action="subscriptions">
-        <label for="date">Date:</label>
-        <input type="date" id="date" name="date" value="<%= htmlWeekDate %>"><br><br>
+        <label for="date">Date (max <%= maxDaysCount %> days):</label>
+        <input type="date" id="date" name="date" value="<%= htmlWeekDate %>" max="<%= maxDate %>" min="<%= minDate %>"><br><br>
         <label for="afterTime">Window start time:</label>
         <input type="time" id="afterTime" name="afterTime" value="18:00"><br><br>
         <label for="beforeTime">Window end time:</label>

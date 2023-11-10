@@ -3,6 +3,7 @@ const express = require('express')
 const { any, isNil, either, isEmpty, flatten } = require('ramda')
 const Subscriptions = require('./subscriptions')
 const airCourtsCoimbraClubs = require('./clubs-coimbra.json')
+const { NUMBER_OF_DAYS_SUBSCRIPTION } = require('./config')
 
 const app = express()
 
@@ -17,8 +18,14 @@ app.get('/', redirectHandler)
 app.get('/home', redirectHandler)
 
 app.get('/subscriptions', async (req, res) => {
+    const today = moment()
+    const min = today.clone()
+    const max = today.clone().add(NUMBER_OF_DAYS_SUBSCRIPTION - 1, 'day')
     res.render('subscription', {
-        htmlWeekDate: moment().format('YYYY-MM-DD'),
+        htmlWeekDate: today.format('YYYY-MM-DD'),
+        maxDate: max.format('YYYY-MM-DD'),
+        minDate: min.format('YYYY-MM-DD'),
+        maxDaysCount: NUMBER_OF_DAYS_SUBSCRIPTION,
         clubs: airCourtsCoimbraClubs.map((club) => ({ id: String(club.id), name: String(club.slug) }))
     })
 })

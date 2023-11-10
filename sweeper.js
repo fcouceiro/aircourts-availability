@@ -9,12 +9,13 @@ const { s3, BUCKET_NAME } = require('./aws/s3')
 const airCourtsCoimbraClubs = require('./clubs-coimbra.json')
 const { getSubscribedDates } = require('./notifier')
 const dateUtils = require('./date-utils')
+const { NUMBER_OF_DAYS_SWEEP } = require('./config')
 
 const coimbraClubIds = airCourtsCoimbraClubs.map((club) => club.id)
 
 const sweep = async ({ weekDate, startTime } = {}) => {
     const { validDates } = await getSubscribedDates()
-    const nextWeekDays = dateUtils.next(7, weekDate)
+    const nextWeekDays = dateUtils.next(NUMBER_OF_DAYS_SWEEP, weekDate)
     const weekDays = uniq(flatten([validDates, nextWeekDays])).sort()
 
     await processAvailabilities(weekDays, startTime)

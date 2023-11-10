@@ -1,0 +1,2 @@
+module.exports.NUMBER_OF_DAYS_SWEEP = process.env.NUMBER_OF_DAYS_SWEEP && parseInt(process.env.NUMBER_OF_DAYS_SWEEP) || 7
+module.exports.NUMBER_OF_DAYS_SUBSCRIPTION = process.env.NUMBER_OF_DAYS_SUBSCRIPTION && parseInt(process.env.NUMBER_OF_DAYS_SUBSCRIPTION) || 30
